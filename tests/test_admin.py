@@ -5,6 +5,8 @@ from pocketbase.models.admin import Admin
 from pocketbase.utils import ClientResponseError
 from uuid import uuid4
 import pytest
+from os import environ, path
+from time import sleep
 
 
 class TestAdminService:
@@ -30,19 +32,32 @@ class TestAdminService:
         assert client.auth_store.model.id == state.admin.id
 
     def test_update_admin(self, client: PocketBase, state):
-        new_email = "%s@%s.com" % (uuid4().hex[:16], uuid4().hex[:16])
+        state.new_email = "%s@%s.com" % (uuid4().hex[:16], uuid4().hex[:16])
         new_password = uuid4().hex
         client.admins.update(
             state.admin.id,
             {
-                "email": new_email,
+                "email": state.new_email,
                 "password": new_password,
                 "passwordConfirm": new_password,
                 "avatar": 8,
             },
         )
         # Pocketbase will have invalidated the auth token on changing logged-in user
-        client.admins.auth_with_password(new_email, new_password)
+        client.admins.auth_with_password(state.new_email, new_password)
+
+    def test_admin_password_reset(self, client: PocketBase, state):
+        assert client.admins.requestPasswordReset(state.new_email)
+        sleep(0.1)
+        mail = environ.get("TMP_EMAIL_DIR") + f"/{state.new_email}"
+        assert path.exists(mail)
+        for line in open(mail).readlines():
+            if "/confirm-password-reset/" in line:
+                token = line.split("/confirm-password-reset/", 1)[1].split('"')[0]
+        assert len(token) > 10
+        new_password = uuid4().hex
+        assert client.admins.confirmPasswordReset(token, new_password, new_password)
+        client.admins.auth_with_password(state.new_email, new_password)
 
     def test_delete_admin(self, client: PocketBase, state):
         client.admins.delete(state.admin.id)

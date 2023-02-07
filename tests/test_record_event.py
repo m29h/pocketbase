@@ -45,6 +45,8 @@ class TestRecordEventService:
             assert e.record.collection_id == state.coll.id
             assert e.record.id == state.record.id
         c.unsubscribe()
+        c.unsubscribe()
+        client.realtime.unsubscribe([])
         sleep(0.1)
         for _ in range(2):
             state.c.create({"title": uuid4().hex})
@@ -59,9 +61,14 @@ class TestRecordEventService:
         r: Record = state.record
         state.test_subscribe_event2 = None
 
+        def callback_ex(e: MessageData):
+            raise Exception("This Callback should be never called")
+
         def callback(e: MessageData):
             state.test_subscribe_event2 = e
 
+        c.subscribeOne(r.id, callback_ex)
+        # subscribing a second time should erase first subscription (for code coverage)
         c.subscribeOne(r.id, callback)
         sleep(0.1)
         for _ in range(2):
@@ -71,7 +78,7 @@ class TestRecordEventService:
             assert e.record.collection_id == state.coll.id
             assert e.record.id == r.id
             state.test_subscribe_event2.record.id = "abc"
-        c.unsubscribe()
+        c.unsubscribe(r.id, r.id)
         sleep(0.1)
 
         for _ in range(2):

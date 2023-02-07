@@ -7,6 +7,8 @@ from pocketbase.utils import ClientResponseError
 
 from uuid import uuid4
 import pytest
+from time import sleep
+from os import environ, path
 
 
 class TestRecordAuthService:
@@ -33,6 +35,9 @@ class TestRecordAuthService:
         # should have gotten a new token
         assert client.auth_store.token != oldtoken
 
+    def test_auth_refresh(self, client):
+        client.collection("users").authRefresh()
+
     def test_change_password(self, client: PocketBase, state):
         new_password = uuid4().hex
         client.collection("users").update(
@@ -45,9 +50,40 @@ class TestRecordAuthService:
         )
         # Pocketbase will have invalidated the auth token on changing logged-in user
         client.collection("users").auth_with_password(state.email, new_password)
+        state.password = new_password
 
     def test_change_username(self, client: PocketBase, state):
         client.collection("users").update(state.user.id, {"username": uuid4().hex})
+
+    def test_change_email(self, client: PocketBase, state):
+        new_email = "%s@%s.com" % (uuid4().hex[:16], uuid4().hex[:16])
+        assert client.collection("users").requestEmailChange(new_email)
+        sleep(0.1)
+        mail = environ.get("TMP_EMAIL_DIR") + f"/{new_email}"
+        assert path.exists(mail)
+        for line in open(mail).readlines():
+            if "/confirm-email-change/" in line:
+                token = line.split("/confirm-email-change/", 1)[1].split('"')[0]
+        assert len(token) > 10
+        assert client.collection("users").confirmEmailChange(token, state.password)
+        client.collection("users").auth_with_password(new_email, state.password)
+        state.email = new_email
+
+    def test_request_password_reset(self, client: PocketBase, state):
+        client.auth_store.clear()
+        state.password = uuid4().hex
+        assert client.collection("users").requestPasswordReset(state.email)
+        sleep(0.1)
+        mail = environ.get("TMP_EMAIL_DIR") + f"/{state.email}"
+        assert path.exists(mail)
+        for line in open(mail).readlines():
+            if "/confirm-password-reset/" in line:
+                token = line.split("/confirm-password-reset/", 1)[1].split('"')[0]
+        assert len(token) > 10
+        assert client.collection("users").confirmPasswordReset(
+            token, state.password, state.password
+        )
+        client.collection("users").auth_with_password(state.email, state.password)
 
     def test_delete_user(self, client: PocketBase, state):
         client.collection("users").delete(state.user.id)

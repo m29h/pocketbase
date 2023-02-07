@@ -1,6 +1,11 @@
 #!/bin/bash
 #get latest release version number
-cd `mktemp -d`
+DBDIR=`mktemp -d`
+#export TMP_EMAIL_DIR=`mktemp -d`
+cp tests/utils/sendmail ${DBDIR}
+chmod 755 ${DBDIR}/sendmail
+cd ${DBDIR}
+export PATH=${DBDIR}:$PATH
 release=$(curl -IkLs -o /dev/null -w %{url_effective} https://github.com/pocketbase/pocketbase/releases/latest|grep -o "[^/]*$"| sed "s/v//g")
 echo ${release}
 wget -qO- https://github.com/pocketbase/pocketbase/releases/download/v${release}/pocketbase_${release}_linux_amd64.zip | bsdtar -xvf- --include pocketbase -C .

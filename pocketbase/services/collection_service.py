@@ -25,12 +25,17 @@ class CollectionService(CrudService):
         that are not present in the imported configuration, WILL BE DELETED
         (including their related records data)!
         """
-        self.client.send(
-            self.base_crud_path() + "/import",
-            {
-                "method": "PUT",
-                "params": query_params,
-                "body": {"collections": collections, "deleteMissing": delete_missing},
-            },
+        return (
+            self.client.send(
+                self.base_crud_path() + "/import",
+                {
+                    "method": "PUT",
+                    "params": query_params,
+                    "body": {
+                        "collections": collections,
+                        "deleteMissing": delete_missing,
+                    },
+                },
+            )
+            is None
         )
-        return True

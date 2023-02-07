@@ -70,3 +70,27 @@ def test_get_nonexisting_exception(client):
     with pytest.raises(ClientResponseError) as exc:
         client.collections.get_one(uuid4().hex)
     assert exc.value.status == 404
+
+
+def test_import_collection(client):
+    data = [
+        {
+            "name": uuid4().hex,
+            "schema": [
+                {
+                    "name": "status",
+                    "type": "bool",
+                },
+            ],
+        },
+        {
+            "name": uuid4().hex,
+            "schema": [
+                {
+                    "name": "title",
+                    "type": "text",
+                },
+            ],
+        },
+    ]
+    assert client.collections.import_collections(data)

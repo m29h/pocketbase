@@ -12,8 +12,6 @@ class AdminAuthResponse:
     def __init__(self, token: str, admin: Admin, **kwargs) -> None:
         self.token = token
         self.admin = admin
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
 
 class AdminService(CrudService):
@@ -115,7 +113,7 @@ class AdminService(CrudService):
                 "passwordConfirm": password_confirm,
             }
         )
-        return self.auth_response(
+        return (
             self.client.send(
                 self.base_crud_path() + "/confirm-password-reset",
                 {
@@ -124,4 +122,5 @@ class AdminService(CrudService):
                     "body": body_params,
                 },
             )
+            is None
         )

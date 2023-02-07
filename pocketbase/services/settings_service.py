@@ -24,11 +24,13 @@ class SettingsService(BaseService):
 
     def test_s3(self, query_params: dict = {}) -> bool:
         """Performs a S3 storage connection test."""
-        self.client.send(
-            "/api/settings/test/s3",
-            {"method": "POST", "params": query_params},
+        return (
+            self.client.send(
+                "/api/settings/test/s3",
+                {"method": "POST", "params": query_params},
+            )
+            is None
         )
-        return True
 
     def test_email(
         self, to_email: str, email_template: str, query_params: dict = {}
@@ -41,12 +43,15 @@ class SettingsService(BaseService):
         - password-reset
         - email-change
         """
-        self.client.send(
-            "/api/settings/test/email",
-            {
-                "method": "POST",
-                "params": query_params,
-                "body": {"email": to_email, "template": email_template},
-            },
+
+        return (
+            self.client.send(
+                "/api/settings/test/email",
+                {
+                    "method": "POST",
+                    "params": query_params,
+                    "body": {"email": to_email, "template": email_template},
+                },
+            )
+            is None
         )
-        return True

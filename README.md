@@ -69,12 +69,12 @@ pocketbase/models/utils/base_model.py               22      0   100%
 pocketbase/models/utils/list_result.py              10      0   100%
 pocketbase/models/utils/schema_field.py             11      0   100%
 pocketbase/services/__init__.py                      7      0   100%
-pocketbase/services/admin_service.py                42      6    86%
-pocketbase/services/collection_service.py           12      2    83%
+pocketbase/services/admin_service.py                40      0   100%
+pocketbase/services/collection_service.py           11      0   100%
 pocketbase/services/log_service.py                  27      0   100%
-pocketbase/services/realtime_service.py             88      8    91%
-pocketbase/services/record_service.py              104     22    79%
-pocketbase/services/settings_service.py             13      2    85%
+pocketbase/services/realtime_service.py             88      3    97%
+pocketbase/services/record_service.py              103      8    92%
+pocketbase/services/settings_service.py             11      0   100%
 pocketbase/services/utils/__init__.py                4      0   100%
 pocketbase/services/utils/base_crud_service.py      37      0   100%
 pocketbase/services/utils/base_service.py            7      0   100%
@@ -85,7 +85,7 @@ pocketbase/stores/base_auth_store.py                23      0   100%
 pocketbase/stores/local_auth_store.py               46      0   100%
 pocketbase/utils.py                                 26      0   100%
 --------------------------------------------------------------------
-TOTAL                                              784     46    94%
+TOTAL                                              778     17    98%
 ```
 
 <p align="center"><i>The PocketBase Python SDK is <a href="https://github.com/m29h/pocketbase/blob/master/LICENCE.txt">MIT licensed</a> code.</p>
